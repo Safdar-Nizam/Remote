@@ -1,6 +1,6 @@
 # Automated Global Onboarding Orchestrator
 
-> **Designed for Remote** — An event-driven system that replaces manual coordination between Kissflow, Remote, Slack, and Notion with a fully tracked, state-machine-driven workflow.
+> **Designed for Remote**  An event-driven system that replaces manual coordination between Kissflow, Remote, Slack, and Notion with a fully tracked, state-machine-driven workflow.
 
 ---
 
@@ -18,12 +18,12 @@ I framed this around one question:
 
 The individual tools (Kissflow, Remote, Notion, Slack) each work fine on their own. The breakdown happens in between:
 
-- **Human-driven handoffs** — Every step depends on someone remembering to do the next action
-- **Fragmented state** — Kissflow knows approvals, Remote knows employment status, Notion tracks legal, Slack carries communication — but no system answers *"Where is this hire right now?"*
-- **Delayed failure detection** — Missing documents or invalid data are caught days later through manual checks
-- **Implicit compliance** — Country-specific rules live in people's heads, not in the system
+- **Human-driven handoffs**  Every step depends on someone remembering to do the next action
+- **Fragmented state** — Kissflow knows approvals, Remote knows employment status, Notion tracks legal, Slack carries communication but no system answers *"Where is this hire right now?"*
+- **Delayed failure detection**  Missing documents or invalid data are caught days later through manual checks
+- **Implicit compliance**  Country-specific rules live in people's heads, not in the system
 
-**The real issue isn't the tools — it's the lack of a central orchestration layer that owns the workflow end-to-end.**
+**The real issue isn't the tools  it's the lack of a central orchestration layer that owns the workflow end-to-end.**
 
 ---
 
