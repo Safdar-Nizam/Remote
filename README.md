@@ -1,38 +1,159 @@
-# Automated Global Onboarding Orchestrator
+Automated Global Onboarding Orchestrator
+Designed for Remote
+Why Remote Asked This
 
-## The Problem
+Remote operates at a very different level compared to typical companies. They are not just hiring, they are enabling global employment across dozens of countries, each with its own compliance rules, legal workflows, and onboarding dependencies.
 
-Global companies that hire across multiple countries rely on a fragile chain of disconnected tools — **Kissflow** for HR approvals, **Remote.com** for international employment, **Notion** for legal tracking, and **Slack** for team communication. When a new hire is approved:
+From what I understood, this exercise is not just about automation. It is about answering one core question:
 
-- An HR coordinator manually copies employee data from Kissflow into Remote
-- They send Slack messages to notify stakeholders
-- They create legal tracker entries in Notion for contract reviews
-- They monitor each system independently for status updates
-- If something goes wrong (missing documents, invalid data, SLA breach), the failure is often discovered **days later** through manual follow-ups
+How do you remove operational friction from a globally distributed hiring system where compliance, accuracy, and speed all matter at the same time?
 
-This manual process is:
+Because at Remote’s scale:
 
-- **Error-prone**: Copy-paste mistakes between systems cause onboarding delays
-- **Untracked**: No single source of truth for "where is this hire in the pipeline?"
-- **Unscalable**: Each new country adds compliance rules that coordinators must remember
-- **Invisible**: Leadership has no dashboard to see bottlenecks or SLA health
+Even a small data error can delay onboarding across countries
+Legal workflows cannot afford gaps or missed tracking
+Operations teams cannot manually manage 25 to 40 hires daily across regions
+There needs to be trust in the system, not just execution
 
-The result? New hires experience delays, compliance risks go undetected, and operations teams spend hours on repetitive coordination instead of strategic work.
+So instead of thinking of this as automation, I approached it as:
 
----
+How would Remote build a system where onboarding runs reliably without depending on human coordination?
 
-## The Solution
+The Problem in Remote’s Context
 
-I built an **event-driven orchestration system** that fully automates the onboarding pipeline. Instead of humans copying data between systems, the orchestrator:
+In the current workflow, tools like Kissflow, Remote platform, Notion, and Slack are all doing their individual jobs correctly, but the problem is in the connections between them.
 
-1. **Listens** for hire events from Kissflow via webhooks
-2. **Validates** the hire data automatically against configurable business rules (required fields, date logic, country compliance, duplicate detection)
-3. **Routes** valid hires through a state machine that tracks every step
-4. **Syncs** data to Remote, Slack, and Notion automatically with built-in retry logic
-5. **Escalates** failures intelligently — blocked validations get an assigned owner, SLA breaches trigger Slack alerts, stuck cases are swept every 5 minutes
-6. **Provides** a real-time operations dashboard for full pipeline visibility
+What I noticed is that the system is:
 
-The key design insight: **treat every onboarding as a tracked workflow case with an immutable audit trail**. Every state change, every external API call, every validation result is recorded. Nothing happens silently.
+Human-driven instead of system-driven
+Every step depends on someone remembering to do the next action
+State is fragmented
+Kissflow knows approval status, Remote knows employment status, Notion tracks legal, Slack carries communication
+But no system actually answers:
+“Where is this hire right now?”
+Failure detection is delayed
+Missing documents or incorrect start dates are only caught when someone manually checks
+Compliance risk is implicit
+Country-specific requirements live in people’s heads instead of being enforced by the system
+
+So the real issue is not the tools.
+It is the lack of a central orchestration layer that owns the workflow end-to-end.
+
+The Solution I Designed for Remote
+
+Instead of adding more tools or dashboards, I introduced a central orchestrator that becomes the brain of the onboarding system.
+
+The idea is simple:
+
+Every new hire becomes a tracked workflow case, and the system takes full ownership of moving it forward.
+
+Here is how it works in Remote’s environment:
+
+1. Event-Driven Start (Kissflow → Orchestrator)
+
+The moment a hire is approved in Kissflow, a webhook triggers the orchestrator.
+
+No polling, no manual checks.
+The system reacts instantly.
+
+2. Intelligent Validation Layer
+
+Before anything is pushed to Remote or other systems, the orchestrator validates:
+
+Required fields are complete
+Start dates make sense
+Country-specific compliance rules are satisfied
+Duplicate hires are avoided
+
+This is important for Remote because:
+
+You do not want bad data entering the employment platform in the first place.
+
+3. State Machine for Workflow Ownership
+
+Instead of scattered tracking, each hire moves through defined states like:
+
+Approved
+Validated
+Employment Created
+Legal Review
+Completed
+
+At any point, we can answer:
+
+“What is the exact status of this hire?”
+
+This becomes the single source of truth.
+
+4. System-to-System Sync (No Manual Work)
+
+The orchestrator then handles all integrations:
+
+Pushes employee data to Remote platform
+Creates legal tracking entries in Notion when needed
+Sends structured Slack updates to relevant stakeholders
+
+All of this happens automatically, with retries if something fails.
+
+So instead of people coordinating systems,
+systems coordinate themselves.
+
+5. Failure Handling That Matches Real Operations
+
+This was the most important part for me.
+
+Instead of just logging errors, the system actively handles them:
+
+Validation failures get assigned to an owner with clear action needed
+API failures retry with backoff
+If something is stuck, a background worker checks every few minutes
+SLA breaches trigger Slack alerts
+
+So nothing sits silently.
+Everything is either progressing or being actively handled.
+
+6. Full Visibility for Remote Teams
+
+Finally, I added a real-time dashboard where operations and leadership can see:
+
+Number of hires in each stage
+Bottlenecks in the pipeline
+SLA performance
+Failure trends
+
+This shifts onboarding from reactive to observable and measurable.
+
+The Core Design Philosophy
+
+The biggest shift I made was this:
+
+Instead of thinking
+“How do we automate tasks?”
+
+I focused on
+“How do we make onboarding a system-owned workflow?”
+
+That is why:
+
+Every action is event-driven
+Every state change is tracked
+Every failure is handled, not ignored
+Every hire has a complete audit trail
+Why This Works Specifically for Remote
+
+This design fits Remote because:
+
+It respects global complexity by embedding compliance into validation
+It reduces manual coordination, which does not scale globally
+It creates trust in the system, which is critical for employment workflows
+It provides operational visibility, which Remote needs at scale
+
+And most importantly,
+
+It allows Remote to move from
+“people managing onboarding”
+to
+“systems reliably executing onboarding”
 
 ---
 
