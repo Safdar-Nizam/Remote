@@ -70,6 +70,17 @@ I built a **central orchestrator** where every new hire becomes a tracked workfl
 - Every failure is **handled, not ignored**
 - Every hire has a **complete trail from webhook to completion**
 
+### Key Design Trade-offs
+
+| Decision | What I Chose | Why |
+|----------|-------------|-----|
+| **Queue over direct calls** | Async SQS queue between webhook and processing | Webhooks return 202 instantly — upstream systems never time out, and we get free retry/DLQ |
+| **Custom state machine over workflow engine** | Hand-built FSM with audit hooks | Full control over guard conditions, audit logging, and transition rules — no black-box orchestrator |
+| **Server-rendered dashboard over SPA** | Jinja2 templates, no React/Vue | Ships with the API server — zero extra infrastructure for ops team to get visibility on day one |
+| **Idempotency keys over dedup tables** | Deterministic keys per operation type | Simpler than maintaining a separate dedup store — replays are safe by default |
+| **Block on ERROR, pass on WARN** | Two severity tiers in validation | Prevents over-blocking (warnings like "start date far out" shouldn't stop the pipeline) |
+| **Human-in-the-loop for legal** | System creates Notion tracker, human reviews | Legal decisions require judgment — automate the workflow around it, not the decision itself |
+
 ---
 
 ## Architecture
