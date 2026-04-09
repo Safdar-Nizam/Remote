@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Cases | Onboarding Orchestrator{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2>Onboarding Cases</h2>
+    <div style="display: flex; gap: 0.5rem;">
+        <input type="text" placeholder="Search employee..." style="padding: 0.5rem; border-radius: 0.5rem; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+        <button class="btn btn-primary">Filter</button>
+    </div>
+</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Workflow ID</th>
+                <th>Employee</th>
+                <th>Country</th>
+                <th>Status</th>
+                <th>Severity</th>
+                <th>Start Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for case in cases %}
+            <tr>
+                <td><code style="color: var(--primary);">{{ case.workflow_id }}</code></td>
+                <td>
+                    <div style="font-weight: 600;">{{ case.employee_full_name }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ case.employee_email }}</div>
+                </td>
+                <td>{{ case.country_code }}</td>
+                <td><span class="status-pill status-{{ case.status.value }}">{{ case.status.value }}</span></td>
+                <td>
+                    <span style="color: {% if case.severity.value == 'CRITICAL' %}var(--danger){% elif case.severity.value == 'HIGH' %}var(--warning){% else %}var(--text-muted){% endif %}; font-weight: 600;">
+                        {{ case.severity.value }}
+                    </span>
+                </td>
+                <td>{{ case.start_date.strftime('%Y-%m-%d') if case.start_date else 'TBD' }}</td>
+                <td>
+                    <a href="/admin/ui/cases/{{ case.id }}" class="btn btn-primary" style="text-decoration: none; font-size: 0.75rem;">Manage</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

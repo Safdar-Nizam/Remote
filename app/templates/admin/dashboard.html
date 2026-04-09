@@ -1,0 +1,204 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dashboard | Onboarding Orchestrator{% endblock %}
+
+{% block extra_head %}
+<style>
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.4);
+    }
+    .stat-card::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        opacity: 0.1;
+    }
+    .stat-card--primary::before { background: var(--primary); }
+    .stat-card--danger::before { background: var(--danger); }
+    .stat-card--accent::before { background: var(--accent); }
+    .stat-card--warning::before { background: var(--warning); }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+        line-height: 1;
+    }
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+    .stat-trend {
+        font-size: 0.75rem;
+        margin-top: 0.5rem;
+        opacity: 0.7;
+    }
+
+    .pipeline-bar {
+        display: flex;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        gap: 2px;
+        margin-top: 1rem;
+    }
+    .pipeline-segment {
+        transition: width 0.6s ease;
+        border-radius: 4px;
+    }
+
+    .activity-row {
+        transition: background 0.15s;
+    }
+    .activity-row:hover td {
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+        animation: fadeInUp 0.4s ease forwards;
+    }
+    .animate-in:nth-child(1) { animation-delay: 0s; }
+    .animate-in:nth-child(2) { animation-delay: 0.08s; }
+    .animate-in:nth-child(3) { animation-delay: 0.16s; }
+    .animate-in:nth-child(4) { animation-delay: 0.24s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h2 style="margin: 0;">Operations Dashboard</h2>
+        <p style="color: var(--text-muted); margin: 0.25rem 0 0; font-size: 0.875rem;">
+            Global onboarding pipeline status in real time
+        </p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="color: var(--text-muted); font-size: 0.8rem;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 0.35rem; animation: pulse 2s infinite;"></span>
+            Live · {{ now.strftime('%H:%M:%S UTC') }}
+        </div>
+        <a href="/admin/ui/dashboard" class="btn btn-primary" style="text-decoration: none; font-size: 0.8rem;">
+            ⟳ Refresh
+        </a>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card stat-card stat-card--primary animate-in" style="border-left: 4px solid var(--primary);">
+        <div class="stat-label">Active Hires</div>
+        <div class="stat-value">{{ stats.total_cases }}</div>
+        <div class="stat-trend">across all stages</div>
+    </div>
+    <div class="card stat-card stat-card--danger animate-in" style="border-left: 4px solid var(--danger);">
+        <div class="stat-label">Blocked / Escalated</div>
+        <div class="stat-value" style="color: {% if stats.blocked_cases > 0 %}var(--danger){% else %}inherit{% endif %};">{{ stats.blocked_cases }}</div>
+        <div class="stat-trend">{% if stats.blocked_cases > 0 %}needs attention{% else %}all clear{% endif %}</div>
+    </div>
+    <div class="card stat-card stat-card--accent animate-in" style="border-left: 4px solid var(--accent);">
+        <div class="stat-label">Completed (All Time)</div>
+        <div class="stat-value">{{ stats.by_status.COMPLETED or 0 }}</div>
+        <div class="stat-trend">successfully onboarded</div>
+    </div>
+    <div class="card stat-card stat-card--warning animate-in" style="border-left: 4px solid var(--warning);">
+        <div class="stat-label">Pending Remote Sync</div>
+        <div class="stat-value">{{ stats.by_status.READY_FOR_REMOTE or 0 }}</div>
+        <div class="stat-trend">awaiting integration</div>
+    </div>
+</div>
+
+<!-- Pipeline Visualization -->
+{% if stats.total_cases > 0 %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h3 style="margin-top: 0; font-size: 1rem;">Pipeline Distribution</h3>
+    <div class="pipeline-bar">
+        {% for status_name, count in stats.by_status.items() %}
+        <div class="pipeline-segment"
+             style="flex: {{ count }}; background: {% if status_name == 'COMPLETED' %}var(--accent){% elif status_name in ('BLOCKED_VALIDATION', 'ESCALATED', 'FAILED_TERMINAL') %}var(--danger){% elif status_name in ('RECEIVED', 'VALIDATING') %}var(--primary){% elif status_name in ('READY_FOR_REMOTE', 'REMOTE_SYNC_IN_PROGRESS') %}#3b82f6{% else %}var(--warning){% endif %};"
+             title="{{ status_name }}: {{ count }}">
+        </div>
+        {% endfor %}
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.75rem; font-size: 0.75rem;">
+        {% for status_name, count in stats.by_status.items() %}
+        <div style="display: flex; align-items: center; gap: 0.35rem;">
+            <span style="width: 10px; height: 10px; border-radius: 2px; background: {% if status_name == 'COMPLETED' %}var(--accent){% elif status_name in ('BLOCKED_VALIDATION', 'ESCALATED', 'FAILED_TERMINAL') %}var(--danger){% elif status_name in ('RECEIVED', 'VALIDATING') %}var(--primary){% elif status_name in ('READY_FOR_REMOTE', 'REMOTE_SYNC_IN_PROGRESS') %}#3b82f6{% else %}var(--warning){% endif %};"></span>
+            <span style="color: var(--text-muted);">{{ status_name.replace('_', ' ') }}: <strong style="color: var(--text);">{{ count }}</strong></span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Activity Table -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0;">Recent Activity</h3>
+        <a href="/admin/ui/cases" style="color: var(--primary); font-size: 0.875rem; text-decoration: none; font-weight: 500;">View all cases →</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Country</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for case in recent_cases %}
+            <tr class="activity-row">
+                <td>
+                    <div style="font-weight: 600;">{{ case.employee_full_name }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ case.employee_email }}</div>
+                </td>
+                <td>
+                    <span style="font-size: 1.1rem;" title="{{ case.country_code }}">
+                        {{ case.country_code }}
+                    </span>
+                </td>
+                <td><span class="status-pill status-{{ case.status.value }}">{{ case.status.value.replace('_', ' ') }}</span></td>
+                <td style="font-size: 0.875rem; white-space: nowrap;">{{ case.created_at.strftime('%b %d, %H:%M') }}</td>
+                <td>
+                    <a href="/admin/ui/cases/{{ case.id }}" class="btn btn-primary" style="text-decoration: none; font-size: 0.75rem; padding: 0.35rem 0.75rem;">Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not recent_cases %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
+                    <div>No active onboarding cases found.</div>
+                    <div style="font-size: 0.8rem; margin-top: 0.25rem;">New cases will appear here when webhooks are received.</div>
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+</style>
+{% endblock %}

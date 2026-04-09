@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: orchestrator
+      POSTGRES_PASSWORD: orchestrator_dev
+      POSTGRES_DB: onboarding
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orchestrator -d onboarding"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://orchestrator:orchestrator_dev@db:5432/onboarding
+      QUEUE_BACKEND: memory
+      LOG_LEVEL: DEBUG
+      ADMIN_API_KEY: dev-admin-key-change-me
+      SLACK_WEBHOOK_URL: ""
+      REMOTE_API_TOKEN: ""
+      REMOTE_API_BASE_URL: https://gateway.remote.com/v1
+      NOTION_API_TOKEN: ""
+      NOTION_LEGAL_DB_ID: ""
+      KISSFLOW_WEBHOOK_SECRET: dev-kissflow-secret
+      REMOTE_WEBHOOK_SECRET: dev-remote-secret
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./app:/code/app
+
+volumes:
+  pgdata:
