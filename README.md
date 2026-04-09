@@ -25,6 +25,24 @@ The individual tools (Kissflow, Remote, Notion, Slack) each work fine on their o
 
 **The real issue isn't the tools  it's the lack of a central orchestration layer that owns the workflow end-to-end.**
 
+### Current Manual Workflow (What Exists Today)
+
+```
+Check Kissflow  →  Copy data to Remote  →  Update Kissflow  →  Notify Slack  →  Update Notion
+   (manual)          (manual entry)         (manual)            (manual)         (if needed)
+```
+
+One coordinator carries all 5 steps sequentially across 4 different tools, **25–40 times per day**. Every handoff is a potential failure point.
+
+### Known Failure Patterns (Mapped to Root Causes)
+
+| Error Pattern | Root Cause | System Impact |
+|---|---|---|
+| **Field doesn't sync** | Manual copy-paste between Kissflow → Remote | Bad employment records, compliance risk |
+| **Start date is incorrect** | Date format varies by country (MM/DD vs DD/MM), no validation | Payroll misalignment, premature onboarding |
+| **Documents are incomplete** | No per-country checklist enforced by the system | Onboarding stalls weeks later when compliance discovers gaps |
+| **Workflow is missed** | No central tracker — a Kissflow record can sit unactioned indefinitely | Hire falls through the cracks, discovered days/weeks later |
+
 ---
 
 ## How I Solved It
@@ -390,6 +408,20 @@ pytest --cov=app --cov-report=term-missing
 | **Configurable validation rules** | Adding a new country's compliance rules doesn't require code changes — just config updates |
 | **Server-rendered dashboard** | No separate frontend build step — dashboard ships with the API server, zero additional infrastructure |
 | **Correlation IDs everywhere** | Every request, queue message, and DB record shares a correlation ID for end-to-end tracing |
+
+---
+
+## Trade-offs: What I Would NOT Automate Yet
+
+| Area | Decision | Reasoning |
+|------|----------|----------|
+| **Legal contract review** | Human-in-the-loop | Legal decisions require judgment. The system creates the Notion tracker and alerts, but a human reviews and signs off. |
+| **Country-specific rule files** | Config-driven framework only | Build the extensible framework first. Add per-country rules as data accumulates from real operations. |
+| **IT provisioning** | Webhook hooks only | Depends on internal tooling (Okta, Google Workspace). Design the integration point now, implement when access is available. |
+| **Slack two-way interaction** | One-way notifications in v1 | Bidirectional Slack bots add complexity. Ship one-way first, add approval buttons in v2. |
+| **Full Remote API coverage** | Create employment only | Remote's API has edge cases per country (EOR vs. direct). Start with the core flow, expand with real scenarios. |
+
+> **Principle:** Automate the reliable path first. Handle exceptions with clear ownership, not silence.
 
 ---
 
