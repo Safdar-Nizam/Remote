@@ -6,7 +6,7 @@
 
 ## Why I Built This
 
-Remote enables global employment across dozens of countries — each with its own compliance rules, legal workflows, and onboarding dependencies. At that scale, the core challenge isn't any single tool. It's the **connections between them**.
+Remote enables global employment across dozens of countries each with its own compliance rules, legal workflows, and onboarding dependencies. At that scale, the core challenge isn't any single tool. It's the **connections between them**.
 
 I framed this around one question:
 
