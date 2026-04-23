@@ -2,7 +2,7 @@
 
 > **Designed for Remote**  An event-driven system that replaces manual coordination between Kissflow, Remote, Slack, and Notion with a fully tracked, state-machine-driven workflow.
 
----
+----
 
 ## Why I Built This
 
